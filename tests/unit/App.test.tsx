@@ -53,6 +53,23 @@ describe('App', () => {
     expect(selectLocation).toHaveBeenCalledWith(saoPauloLocation);
   });
 
+  it('keeps the selected location highlighted while the forecast loads', () => {
+    mockWeatherSearchState({
+      status: 'loadingForecast',
+      locations: locationsFixture,
+      selectedLocation: saoPauloLocation,
+      weather: null,
+      error: null,
+    });
+
+    renderWithUser(<App />);
+
+    expect(screen.getByRole('button', { name: /São Paulo/ })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+  });
+
   it('renders selected location, current weather and five forecast days on success', () => {
     mockWeatherSearchState({
       status: 'success',
