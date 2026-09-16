@@ -252,7 +252,7 @@ dependência e verificáveis isoladamente. As tarefas seguem o fluxo
 - **Descrição:** Cobrir o fluxo de busca, seleção e erro com testes de
   comportamentos acessíveis e navegação por teclado.
 - **Requisitos:** AC1, AC5, AC6, NFR3, NFR7.
-- **Dependências:** T-12A, T-12B, T-16.
+- **Dependências:** T-12A, T-12B.
 - **Arquivos prováveis:** `tests/unit/FeedbackState.test.tsx`,
   `tests/unit/LocationResults.test.tsx`, `tests/unit/UnitToggle.test.tsx`,
   `tests/e2e/weather-app.spec.ts`.
