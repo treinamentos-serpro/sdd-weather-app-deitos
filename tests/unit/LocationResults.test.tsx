@@ -37,6 +37,22 @@ describe('LocationResults', () => {
     expect(screen.queryByText('Brasil')).not.toBeInTheDocument();
   });
 
+  it('marks the currently selected city as active for assistive technology', () => {
+    renderWithUser(
+      <LocationResults
+        locations={[saoPauloLocation, lisbonLocation]}
+        onSelect={vi.fn()}
+        selectedLocationId={saoPauloLocation.id}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: /São Paulo/ })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(screen.getByRole('button', { name: /Lisboa/ })).toHaveAttribute('aria-pressed', 'false');
+  });
+
   it('emits the complete selected location once by click or keyboard activation', async () => {
     const onSelect = vi.fn();
     const { user } = renderWithUser(

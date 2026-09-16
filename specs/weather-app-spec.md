@@ -103,7 +103,7 @@ A aplicação deve funcionar sem autenticação, sem chave de API do cliente e c
 
 - **NFR1 — Performance:** a interface deve responder em até 2 segundos em rede 4G estável para ações de busca e renderização inicial, e a conversão de temperatura deve ocorrer sem nova chamada à API.
 - **NFR2 — Responsividade:** a aplicação deve ser mobile-first e funcionar corretamente em pequenas telas, além de manter usabilidade em desktop.
-- **NFR3 — Acessibilidade:** o produto deve oferecer navegação por teclado, labels semânticos, foco visível, contraste legível e estrutura semântica adequada para leitores de tela.
+- **NFR3 — Acessibilidade:** o produto deve oferecer navegação por teclado, labels semânticos, foco visível, contraste legível e estrutura semântica adequada para leitores de tela. As mudanças de estado e erro devem ser anunciadas com live regions apropriadas: mensagens de progresso em modo `polite`, mensagens críticas em modo `assertive` e ausência de conflito entre `role="alert"` e `aria-live`. Controles de escolha, como a seleção de cidade e a alternância de unidade, devem expor seu estado ativo/selecionado via atributos semânticos e manter feedback visual e textual consistente para usuários de teclado e leitores de tela.
 - **NFR4 — Resiliência:** em caso de falha de rede, retorno inválido da API ou indisponibilidade do serviço, a aplicação deve preservar a experiência do usuário e apresentar mensagens compreensíveis.
 - **NFR5 — Segurança operacional:** a aplicação não deve exigir chave de API do cliente nem expor segredos de infraestrutura em front-end.
 - **NFR6 — Manutenibilidade:** regras de conversão de temperatura e renderização devem ser centralizadas em funções puras e testáveis, reduzindo duplicidade e erros.

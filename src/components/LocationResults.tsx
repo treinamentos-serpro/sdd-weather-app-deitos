@@ -3,9 +3,14 @@ import type { Location } from '../types/weather';
 interface LocationResultsProps {
   locations: Location[];
   onSelect: (location: Location) => void | Promise<void>;
+  selectedLocationId?: number | null;
 }
 
-export default function LocationResults({ locations, onSelect }: LocationResultsProps) {
+export default function LocationResults({
+  locations,
+  onSelect,
+  selectedLocationId = null,
+}: LocationResultsProps) {
   if (locations.length === 0) {
     return null;
   }
@@ -18,11 +23,17 @@ export default function LocationResults({ locations, onSelect }: LocationResults
       <ul className="grid gap-2">
         {locations.map((location) => {
           const context = formatLocationContext(location);
+          const isSelected = location.id === selectedLocationId;
 
           return (
             <li key={location.id}>
               <button
-                className="w-full rounded-lg border border-white/10 bg-white/5 p-4 text-left text-white backdrop-blur-md transition hover:border-accent-400/70 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:ring-offset-2 focus:ring-offset-night-900"
+                aria-pressed={isSelected}
+className={
+  isSelected
+    ? 'w-full rounded-lg border border-accent-400 bg-accent-500/20 p-4 text-left text-white backdrop-blur-md transition focus:outline-none focus:ring-2 focus:ring-accent-400 focus:ring-offset-2 focus:ring-offset-night-900'
+    : 'w-full rounded-lg border border-white/10 bg-white/5 p-4 text-left text-white backdrop-blur-md transition hover:border-accent-400/70 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:ring-offset-2 focus:ring-offset-night-900'
+}
                 onClick={() => void onSelect(location)}
                 type="button"
               >

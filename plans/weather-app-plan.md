@@ -181,17 +181,19 @@ Ao iniciar nova busca, limpar previsão e cidade anterior evita vazamento de con
 | Geocoding em curso | `searchingLocations` | Indicador acessível no formulário. |
 | Sem localidades | `empty` | Mensagem específica; cidade e previsão permanecem limpas. |
 | Escolha de local | `selectingLocation` | Lista de botões com nome e contexto. |
-| Forecast em curso | `loadingForecast` | Indicador visual e anúncio por `aria-live`. |
-| HTTP, rede, JSON inválido ou payload inválido | `error` | Texto compreensível e botão “Tentar novamente”. |
+| Forecast em curso | `loadingForecast` | Indicador visual e anúncio por `aria-live` em modo polite. |
+| HTTP, rede, JSON inválido ou payload inválido | `error` | Texto compreensível, botão “Tentar novamente” e anúncio em modo assertive. |
 | Campo individual ausente | `success` | Exibir `—`; os demais campos continuam disponíveis. |
 
-O retry repete a última operação falha: geocoding com o termo submetido ou forecast com a `Location` selecionada. Erros de aborto não são exibidos. Mensagens dinâmicas usam `aria-live="polite"`; o foco continua no controle iniciado pelo usuário, exceto quando for necessário focar uma mensagem de erro acionável.
+O retry repete a última operação falha: geocoding com o termo submetido ou forecast com a `Location` selecionada. Erros de aborto não são exibidos. Mensagens dinâmicas usam live regions com prioridade adequada: `aria-live="polite"` para progresso e `role="alert"`/`aria-live="assertive"` para erros críticos. O foco continua no controle iniciado pelo usuário, exceto quando for necessário focar uma mensagem de erro acionável.
 
 ## 9. UI and Accessibility Decisions
 
 - Aplicar layout mobile-first em Tailwind, com fundo `night-900`, superfícies glass (`bg-white/5`, `backdrop-blur-md`, bordas sutis) e contraste de texto claro.
 - Usar `main`, `header`, `form`, `section`, `article`, listas e botões reais. Resultados de localização são botões navegáveis por Tab, Enter e Espaço.
 - O input tem `label` visível ou acessível, `aria-describedby` para validação e submit por Enter. O alternador de unidade é um grupo rotulado de botões com estado atual em `aria-pressed`.
+- A área de feedback de status usará `role="status"` e `aria-live="polite"` para carregamento e progresso, enquanto mensagens críticas usarão `role="alert"` e `aria-live="assertive"` sem conflito de anúncios.
+- Controles de escolha devem expor estado ativo/selecionado por meio de `aria-pressed`, `aria-current` ou equivalente, com destaque visual consistente para cada opção selecionada.
 - Exibir previsão em `grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5`, com cinco cartões de tamanho estável e foco visível.
 - Formatar datas por `Intl.DateTimeFormat('pt-BR', ...)`. Exibir ícone e rótulo textual da condição, sem depender apenas de cor ou símbolo.
 
@@ -224,9 +226,34 @@ Mockar `fetch` nos testes de services/hook; não depender da Open-Meteo em teste
 4. Construir `SearchForm` e `LocationResults`, incluindo validação, seleção explícita e acessibilidade de teclado.
 5. Construir `CurrentWeather`, `ForecastDay`, `DailyForecast` e `UnitToggle`; integrar em `App` com layout Tailwind responsivo.
 6. Adicionar feedback para todos os estados e executar testes E2E com rotas da API interceptadas.
-7. Executar `pnpm lint`, `pnpm build`, `pnpm test` e `pnpm test:e2e` antes da revisão.
+7. Implementar a camada de a11y específica do ajuste: live regions consistentes, estado selecionado em controles e validação de foco/teclado.
+8. Executar `pnpm lint`, `pnpm build`, `pnpm test` e `pnpm test:e2e` antes da revisão.
 
-## 12. Risks & Trade-offs
+## 12. Accessibility Implementation Plan
+
+O ajuste de acessibilidade incorporado à spec exige uma implementação explícita e verificável. A execução deve seguir esta sequência:
+
+1. Review de live regions
+   - Definir um padrão único: `status` + `aria-live="polite"` para progresso e `alert` + `aria-live="assertive"` para erro crítico.
+   - Garantir que não haja duplicidade de anúncio por conflito entre `role` e `aria-live`.
+   - Validar mensagens de carregamento, vazio e retry sem ruído excessivo.
+
+2. Estado semântico para elementos selecionáveis
+   - Em `LocationResults`, marcar a opção ativa com `aria-pressed` ou `aria-current`, além do destaque visual.
+   - Em `UnitToggle`, preservar a semântica do grupo e do item selecionado, sem depender apenas de cor.
+   - Garantir que o estado selecionado seja anunciado corretamente por leitores de tela.
+
+3. A11y de teclado e foco
+   - Manter foco no controle que originou a ação, exceto em casos em que a mensagem de erro requer foco explícito.
+   - Confirmar que a navegação por Tab, Enter e Espaço continua funcional em todos os componentes interativos.
+   - Revalidar o foco visível em botões, opções e ação de retry.
+
+4. Testes de regressão e verificação
+   - Criar testes unitários para garantir que os estados de erro/carregamento e seleção ativa exponham semântica correta.
+   - Adicionar cenário E2E para verificar anúncio e comportamento de teclado em busca, seleção e retry.
+   - Usar ferramentas de auditoria e testes de acessibilidade para confirmar ausência de alertas críticos.
+
+## 13. Risks & Trade-offs
 
 | Risco ou decisão | Impacto | Mitigação ou justificativa |
 | --- | --- | --- |
