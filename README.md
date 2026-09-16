@@ -76,6 +76,43 @@ pnpm test:coverage   # cobertura
 pnpm test:e2e        # testes E2E (Playwright)
 ```
 
+### Executando o app
+
+```bash
+pnpm dev
+```
+
+O Vite inicia a aplicação localmente, por padrão em `http://localhost:5173`.
+Para validar o pacote de produção:
+
+```bash
+pnpm build
+pnpm preview
+```
+
+### Validação do MVP
+
+Antes de concluir uma mudança, rode:
+
+```bash
+pnpm lint
+pnpm build
+pnpm test
+pnpm test:e2e
+```
+
+Os testes unitários usam Vitest + Testing Library. Os testes E2E usam Playwright
+e interceptam as rotas da Open-Meteo, sem chamadas reais à API durante a suíte
+automatizada.
+
+Se o Playwright indicar bibliotecas nativas ausentes no Linux, instale as
+dependências do navegador no ambiente e execute novamente:
+
+```bash
+pnpm exec playwright install
+pnpm exec playwright install-deps
+```
+
 ---
 
 ## Arquitetura do app
@@ -83,14 +120,18 @@ pnpm test:e2e        # testes E2E (Playwright)
 ```text
 src/
 ├── components/      # apresentação (um componente por arquivo)
-│   └── states/      # loading, erro, vazio
-├── hooks/           # orquestração (useWeather)
+├── hooks/           # orquestração (useWeatherSearch)
 ├── services/        # acesso a dados (Open-Meteo) isolado
-├── lib/             # funções puras (conversão, formatação, códigos WMO)
+├── utils/           # funções puras de conversão e formatação
 ├── types/           # contratos compartilhados
-├── styles/          # Tailwind + estilos globais
+├── index.css        # Tailwind + estilos globais
 ├── App.tsx          # composição da tela
 └── main.tsx         # bootstrap React
+
+tests/
+├── fixtures/        # payloads e modelos determinísticos
+├── unit/            # services, hooks e componentes
+└── e2e/             # fluxos Playwright com rede interceptada
 ```
 
 Decisões-chave:
@@ -99,6 +140,19 @@ Decisões-chave:
   toggle °C/°F **não** faz nova requisição).
 - **Rede isolada** em `services/` — componentes e hooks não conhecem URLs.
 - Sempre tratar **loading**, **erro** e **vazio**.
+- **Busca explícita** por submit; resultados ambíguos exigem seleção manual da
+  localidade antes do forecast.
+
+## Dados e limites do MVP
+
+O app usa os endpoints públicos da **Open-Meteo** para geocoding e forecast:
+
+- `https://geocoding-api.open-meteo.com/v1/search`
+- `https://api.open-meteo.com/v1/forecast`
+
+Não há API key, token ou segredo no bundle do cliente. A versão atual também não
+inclui autenticação, persistência local, favoritos, histórico de buscas,
+geolocalização automática, notificações ou backend próprio.
 
 ---
 
