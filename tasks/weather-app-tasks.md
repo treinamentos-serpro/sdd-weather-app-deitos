@@ -315,6 +315,11 @@ dependência e verificáveis isoladamente. As tarefas seguem o fluxo
   - `pnpm test` conclui com todos os testes unitários e de componentes.
   - `pnpm test:e2e` conclui nos projetos configurados ou registra claramente
     uma limitação ambiental reproduzível.
+  - O fluxo de busca e renderização inicial é medido em condição de rede
+    4G estável e atende ao limite de 2 segundos definido em NFR1; a medição e
+    o ambiente usado ficam registrados no resultado da validação.
+  - A conversão de unidade é verificada sem nova chamada de rede e sem
+    mutação dos dados canônicos.
   - Não há chamadas reais à Open-Meteo nos testes automatizados.
   - Uma nova busca não permite que resposta obsoleta sobrescreva a tela.
 
