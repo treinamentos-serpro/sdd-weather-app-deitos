@@ -14,7 +14,7 @@ export default function App() {
   const isLoading = state.status === 'searchingLocations' || state.status === 'loadingForecast';
   const selectedLocationId =
     state.status === 'loadingForecast' || state.status === 'success' || state.status === 'error'
-      ? state.selectedLocation?.id ?? null
+      ? (state.selectedLocation?.id ?? null)
       : null;
 
   return (

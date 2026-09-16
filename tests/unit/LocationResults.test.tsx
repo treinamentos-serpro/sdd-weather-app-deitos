@@ -46,7 +46,10 @@ describe('LocationResults', () => {
       />,
     );
 
-    expect(screen.getByRole('button', { name: /São Paulo/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: /São Paulo/ })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
     expect(screen.getByRole('button', { name: /Lisboa/ })).toHaveAttribute('aria-pressed', 'false');
   });
 
