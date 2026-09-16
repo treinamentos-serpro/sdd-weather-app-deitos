@@ -27,8 +27,9 @@ dependência e verificáveis isoladamente. As tarefas seguem o fluxo
 
 - **Tipo:** Data
 - **Descrição:** Criar funções puras para converter e formatar temperaturas,
-  formatar datas em pt-BR e mapear códigos WMO para rótulo e texto alternativo.
-- **Requisitos:** RF4, RF5, RF6, BR5, BR6, NFR1, NFR6.
+  formatar datas em pt-BR e mapear códigos WMO para rótulo, texto
+  alternativo, chave de ícone e tom visual.
+- **Requisitos:** RF4, RF5, RF6, BR5, BR6, NFR1, NFR3, NFR6.
 - **Dependências:** T-01.
 - **Arquivos prováveis:** `src/utils/temperature.ts`, `src/utils/date.ts`,
   `src/services/weatherCode.ts`.
@@ -38,8 +39,9 @@ dependência e verificáveis isoladamente. As tarefas seguem o fluxo
   - Valores `null` são preservados ou formatados como `—`.
   - O arredondamento ocorre apenas na apresentação.
   - Datas ISO válidas são exibidas em pt-BR.
-  - Códigos WMO conhecidos retornam condição e texto alternativo; códigos
-    desconhecidos retornam fallback legível.
+  - Códigos WMO conhecidos retornam condição, texto alternativo, chave de
+    ícone e tom visual; códigos desconhecidos retornam fallback legível e tom
+    neutro.
 
 ### T-03 — Criar fixtures e helpers de teste determinísticos
 
@@ -71,6 +73,8 @@ dependência e verificáveis isoladamente. As tarefas seguem o fluxo
   - Os casos Celsius -> Fahrenheit -> Celsius são verificados.
   - Valores nulos e códigos desconhecidos não lançam exceção.
   - A saída formatada usa o fallback definido pelo plano.
+  - O descritor visual de códigos WMO retorna chaves semânticas de ícone e
+    tons esperados para sol, nuvens, chuva, tempestade, neblina, neve e fallback.
 
 ## Entrega 2 — Integração com Open-Meteo
 
@@ -266,13 +270,40 @@ dependência e verificáveis isoladamente. As tarefas seguem o fluxo
 
 ## Entrega 5 — Clima, previsão e unidade
 
+### T-13A — Criar o sistema de iconografia contextual
+
+- **Tipo:** UI / Data
+- **Descrição:** Instalar `lucide-react`, criar o mapa semântico de ícones e
+  conectar os descritores visuais de condição e métricas ao padrão definido no
+  plano, sem SVG manual nos componentes.
+- **Requisitos:** RF4, RF5, RF7, RF8, AC2, AC3, AC5, AC6, NFR2, NFR3.
+- **Dependências:** T-02, T-04.
+- **Arquivos prováveis:** `package.json`, `pnpm-lock.yaml`,
+  `src/components/icons.ts`, `src/services/weatherCode.ts`,
+  `src/types/weather.ts`.
+- **Critérios de aceite:**
+  - `lucide-react` está disponível como dependência do projeto e o lockfile é
+    atualizado pelo gerenciador de pacotes.
+  - `components/icons.ts` expõe mapas semânticos para condições climáticas,
+    métricas e ações, usando ícones lucide.
+  - Condições WMO mapeiam para ícones esperados: céu limpo, nuvens, neblina,
+    chuva, neve, tempestade e fallback neutro.
+  - Métricas e ações possuem ícones específicos para busca, localidade,
+    temperatura, sensação térmica, umidade, vento, precipitação, retry, erro e
+    loading.
+  - Ícones decorativos são preparados para `aria-hidden="true"`; condições
+    climáticas continuam acompanhadas de rótulo textual ou texto alternativo.
+  - Nenhum componente precisa importar SVG local ou decidir manualmente qual
+    ícone representa uma condição meteorológica.
+
 ### T-13 — Construir apresentação do clima atual e da previsão diária
 
 - **Tipo:** UI
 - **Descrição:** Criar os componentes de clima atual, cartão diário e grade de
-  cinco dias usando somente dados normalizados.
+  cinco dias usando somente dados normalizados, descritores visuais e
+  iconografia contextual.
 - **Requisitos:** RF4, RF5, RF8, BR3, BR6, AC2, AC3, AC6, NFR2, NFR3.
-- **Dependências:** T-02, T-06.
+- **Dependências:** T-02, T-06, T-13A.
 - **Arquivos prováveis:** `src/components/CurrentWeather.tsx`,
   `src/components/ForecastDay.tsx`, `src/components/DailyForecast.tsx`.
 - **Critérios de aceite:**
@@ -281,8 +312,10 @@ dependência e verificáveis isoladamente. As tarefas seguem o fluxo
   - Cada dia mostra data, condição, mínima, máxima, precipitação e vento.
   - A grade renderiza exatamente cinco dias quando o forecast é válido.
   - Campos `null` aparecem como `—` sem quebrar a estrutura.
-  - Condições têm rótulo textual e texto alternativo, sem depender apenas de
-    cor ou símbolo.
+  - Condições têm ícone, rótulo textual e texto alternativo, sem depender
+    apenas de cor ou símbolo.
+  - Métricas atuais e diárias usam ícones contextuais estáveis, com rótulo
+    textual preservado para leitura e testes acessíveis.
 
 ### T-14 — Construir o alternador de unidade sem nova requisição
 
@@ -316,13 +349,89 @@ dependência e verificáveis isoladamente. As tarefas seguem o fluxo
   - A previsão usa layout responsivo com cinco cartões estáveis.
   - Nenhuma chave ou segredo é necessário no bundle do cliente.
 
+### T-15A — Refinar direção visual e hierarquia da interface
+
+- **Tipo:** UI
+- **Descrição:** Modernizar a apresentação com linguagem atmosférica suave,
+  superfícies glass menos genéricas, hierarquia mais sofisticada e paleta com
+  acentos contextuais para clima, métricas e estados.
+- **Requisitos:** RF4, RF5, RF7, RF8, US1, US4, AC2, AC3, AC5, AC6, NFR2,
+  NFR3.
+- **Dependências:** T-13, T-14, T-15.
+- **Arquivos prováveis:** `src/App.tsx`, `src/index.css`,
+  `tailwind.config.js`, `src/components/CurrentWeather.tsx`,
+  `src/components/ForecastDay.tsx`, `src/components/DailyForecast.tsx`,
+  `src/components/SearchForm.tsx`, `src/components/LocationResults.tsx`,
+  `src/components/FeedbackState.tsx`, `src/components/UnitToggle.tsx`.
+- **Critérios de aceite:**
+  - A primeira dobra em mobile e desktop comunica ação de busca, cidade quando
+    selecionada, temperatura e condição sem sobreposição.
+  - O cartão de clima atual tem maior peso visual que previsão e métricas
+    secundárias, sem parecer uma landing page.
+  - A previsão mantém cartões de tamanho estável em `grid` responsivo e leitura
+    rápida dos cinco dias.
+  - A paleta mantém base escura com acentos contextuais de ciano, âmbar e
+    verde-água, evitando aparência monocromática.
+  - Textos essenciais e foco visível preservam contraste AA em superfícies
+    translúcidas.
+  - Cartões e painéis respeitam raio de até 8px, salvo exceção justificada pelo
+    sistema visual existente.
+
+### T-15B — Aplicar iconografia funcional nos fluxos principais
+
+- **Tipo:** UI
+- **Descrição:** Incorporar os ícones do sistema visual em busca, resultados,
+  clima atual, previsão, alternância de unidade e estados de feedback, mantendo
+  rótulos textuais e semântica acessível.
+- **Requisitos:** RF1, RF2, RF4, RF5, RF6, RF7, RF8, AC1-AC6, NFR2, NFR3.
+- **Dependências:** T-13A, T-15A.
+- **Arquivos prováveis:** `src/components/SearchForm.tsx`,
+  `src/components/LocationResults.tsx`, `src/components/CurrentWeather.tsx`,
+  `src/components/ForecastDay.tsx`, `src/components/FeedbackState.tsx`,
+  `src/components/UnitToggle.tsx`.
+- **Critérios de aceite:**
+  - Botão de busca usa `Search`; loading usa `LoaderCircle`; retry usa
+    `RefreshCcw`; erro usa `AlertCircle`.
+  - Resultados de localidade usam `MapPin` e mantêm país/região em hierarquia
+    secundária legível.
+  - Clima atual e previsão exibem ícone de condição junto ao rótulo textual.
+  - Temperatura, sensação térmica, umidade, vento e precipitação usam ícones
+    específicos sem substituir seus rótulos.
+  - Ícones puramente decorativos ficam com `aria-hidden="true"` e não criam
+    anúncios duplicados.
+  - Nenhum controle fica dependente apenas de ícone para comunicar ação ou
+    estado.
+
+### T-15C — Implementar suavidade visual e motion acessível
+
+- **Tipo:** UI / Hardening
+- **Descrição:** Adicionar microinterações discretas para hover, foco,
+  carregamento, entrada de painéis e troca de unidade, respeitando
+  `prefers-reduced-motion` e evitando deslocamento de layout.
+- **Requisitos:** RF6, RF7, AC4, AC5, NFR1, NFR2, NFR3.
+- **Dependências:** T-15A, T-15B.
+- **Arquivos prováveis:** `src/index.css`, `tailwind.config.js`,
+  `src/components/SearchForm.tsx`, `src/components/FeedbackState.tsx`,
+  `src/components/UnitToggle.tsx`, `src/components/CurrentWeather.tsx`,
+  `src/components/ForecastDay.tsx`.
+- **Critérios de aceite:**
+  - Hover, focus, entrada de painéis e troca de unidade usam transições entre
+    150ms e 220ms.
+  - Loading pode usar rotação apenas quando `prefers-reduced-motion` permitir.
+  - Com redução de movimento ativa, não há translação nem rotação contínua.
+  - A troca C/F não altera dimensões dos cartões nem provoca salto visual dos
+    valores de temperatura.
+  - Estados dinâmicos continuam anunciados pelas live regions definidas nas
+    tarefas de acessibilidade.
+
 ### T-16 — Testar componentes e integração de apresentação
 
 - **Tipo:** Test
 - **Descrição:** Cobrir componentes com Testing Library usando queries
   acessíveis e services/hook mockados.
 - **Requisitos:** RF2, RF4, RF5, RF6, RF7, RF8, RF9, AC1-AC6, NFR3, NFR7.
-- **Dependências:** T-10, T-11, T-12, T-13, T-14, T-15.
+- **Dependências:** T-10, T-11, T-12, T-13, T-14, T-15, T-15A, T-15B,
+  T-15C.
 - **Arquivos prováveis:** `tests/unit/SearchForm.test.tsx`,
   `tests/unit/LocationResults.test.tsx`, `tests/unit/WeatherDisplay.test.tsx`,
   `tests/unit/FeedbackState.test.tsx`, `tests/unit/UnitToggle.test.tsx`.
@@ -332,6 +441,30 @@ dependência e verificáveis isoladamente. As tarefas seguem o fluxo
   - O clima atual e os cinco dias aparecem com labels esperados.
   - O alternador muda os valores exibidos sem nova chamada mockada.
   - Os testes usam roles e labels, não classes CSS ou detalhes internos.
+  - Ícones funcionais não removem labels acessíveis nem criam anúncios
+    duplicados para condições, métricas e estados.
+
+### T-16A — Validar critérios UX visuais e responsivos
+
+- **Tipo:** Test / Review
+- **Descrição:** Verificar manualmente e por testes automatizados os critérios
+  UX da modernização visual em desktop e mobile, incluindo primeira dobra,
+  contraste, estabilidade de layout e redução de movimento.
+- **Requisitos:** US1, US4, RF4, RF5, RF7, RF8, AC2-AC6, NFR1, NFR2, NFR3,
+  NFR7.
+- **Dependências:** T-16, T-17.
+- **Arquivos prováveis:** `tests/e2e/weather-app.spec.ts`, documentação de
+  validação no resultado da tarefa ou checklist de revisão.
+- **Critérios de aceite:**
+  - Desktop e mobile mostram cidade, temperatura, condição e ação principal na
+    primeira dobra, sem texto ou elementos sobrepostos.
+  - Toda métrica meteorológica relevante tem ícone contextual e rótulo textual.
+  - Loading, erro, vazio e seleção são distinguíveis por texto, ícone e
+    hierarquia visual.
+  - A troca C/F não dispara nova requisição, não desloca cartões e mantém
+    largura visual estável para temperaturas.
+  - A verificação registra evidência de contraste, foco visível e comportamento
+    com `prefers-reduced-motion`.
 
 ## Entrega 6 — Fluxos E2E e hardening
 
@@ -341,7 +474,7 @@ dependência e verificáveis isoladamente. As tarefas seguem o fluxo
 - **Descrição:** Implementar jornadas determinísticas de busca, seleção,
   forecast, erro, retry, unidade e validação nos projetos desktop e mobile.
 - **Requisitos:** RF1-RF9, BR1-BR7, AC1-AC6, NFR2, NFR3, NFR4, NFR7.
-- **Dependências:** T-15.
+- **Dependências:** T-15C, T-16.
 - **Arquivos prováveis:** `tests/e2e/weather-app.spec.ts`,
   `playwright.config.ts` se necessário.
 - **Critérios de aceite:**
@@ -353,6 +486,8 @@ dependência e verificáveis isoladamente. As tarefas seguem o fluxo
   - C/F altera as temperaturas sem nova requisição interceptada.
   - Submit vazio/curto não dispara rota de API.
   - Há validação de teclado e pelo menos um cenário no viewport mobile.
+  - O cenário mobile valida que a modernização visual não causa sobreposição na
+    primeira dobra nem perda de rótulos acessíveis.
 
 ### T-18 — Executar hardening de qualidade e compatibilidade
 
@@ -360,7 +495,7 @@ dependência e verificáveis isoladamente. As tarefas seguem o fluxo
 - **Descrição:** Verificar acessibilidade básica, concorrência, responsividade,
   contratos de build e ausência de segredos antes da entrega.
 - **Requisitos:** NFR1, NFR2, NFR3, NFR4, NFR5, NFR6, NFR7.
-- **Dependências:** T-04, T-07, T-09, T-16, T-17.
+- **Dependências:** T-04, T-07, T-09, T-16, T-16A, T-17.
 - **Arquivos prováveis:** `src/**`, `tests/**`, configurações somente quando
   um erro reproduzível exigir ajuste.
 - **Critérios de aceite:**
@@ -376,6 +511,8 @@ dependência e verificáveis isoladamente. As tarefas seguem o fluxo
     mutação dos dados canônicos.
   - Não há chamadas reais à Open-Meteo nos testes automatizados.
   - Uma nova busca não permite que resposta obsoleta sobrescreva a tela.
+  - A camada visual final preserva contraste, foco visível, responsividade,
+    iconografia textualizada e redução de movimento.
 
 ### T-19 — Consolidar documentação operacional da entrega
 
@@ -400,8 +537,10 @@ T-01 -> T-05 -> T-06 -> T-07
 T-05 + T-06 -> T-08 -> T-09
 T-08 -> T-10 + T-11 + T-12
 T-12 -> T-12A + T-12B + T-12C
-T-02 + T-06 -> T-13 -> T-14
-T-10 + T-11 + T-12 + T-12A + T-12B + T-12C + T-13 + T-14 -> T-15 -> T-16
-T-15 -> T-17
-T-04 + T-07 + T-09 + T-16 + T-17 -> T-18 -> T-19
+T-02 + T-04 -> T-13A
+T-02 + T-06 + T-13A -> T-13 -> T-14
+T-10 + T-11 + T-12 + T-12A + T-12B + T-12C + T-13 + T-14 -> T-15
+T-15 -> T-15A -> T-15B -> T-15C -> T-16
+T-15C + T-16 -> T-17 -> T-16A
+T-04 + T-07 + T-09 + T-16 + T-17 + T-16A -> T-18 -> T-19
 ```

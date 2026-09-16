@@ -1,5 +1,33 @@
 export type TemperatureUnit = 'celsius' | 'fahrenheit';
 
+export type WeatherVisualTone =
+  | 'clear'
+  | 'cloudy'
+  | 'rain'
+  | 'storm'
+  | 'fog'
+  | 'snow'
+  | 'wind'
+  | 'neutral';
+
+export type WeatherIconKey =
+  | 'alert'
+  | 'cloud'
+  | 'cloudFog'
+  | 'cloudLightning'
+  | 'cloudRain'
+  | 'cloudSnow'
+  | 'cloudSun'
+  | 'droplets'
+  | 'gauge'
+  | 'loader'
+  | 'mapPin'
+  | 'refresh'
+  | 'search'
+  | 'sun'
+  | 'thermometer'
+  | 'wind';
+
 export interface Location {
   id: number;
   name: string;

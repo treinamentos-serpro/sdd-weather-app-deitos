@@ -11,11 +11,24 @@
     min-width: 320px;
     min-height: 100vh;
     margin: 0;
-    background: #0b1020;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(139, 155, 255, 0.18), transparent 26rem),
+      radial-gradient(circle at 85% 0%, rgba(45, 212, 191, 0.12), transparent 28rem), #0b1020;
   }
 
   button,
   input {
     font: inherit;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms;
+      animation-iteration-count: 1;
+      scroll-behavior: auto;
+      transition-duration: 0.01ms;
+    }
   }
 }
