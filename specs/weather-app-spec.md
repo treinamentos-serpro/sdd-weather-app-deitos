@@ -18,6 +18,16 @@ A aplicação deve funcionar sem autenticação, sem chave de API do cliente e c
 - **RF8 — Identificação visual da cidade:** a interface deve exibir o nome da cidade selecionada e o contexto geográfico que permita distinguir localidades homônimas.
 - **RF9 — Validação de entrada:** buscas vazias ou inválidas não devem disparar consultas nem gerar estados inconsistentes.
 
+## Business Rules
+
+- **BR1 — Busca mínima:** a busca deve exigir pelo menos 2 caracteres para iniciar a consulta, reduzindo ruído e evitando chamadas desnecessárias.
+- **BR2 — Desempate de cidade:** quando houver mais de uma correspondência para o mesmo nome, a aplicação deve apresentar uma lista com nome da cidade, região/estado e país, e a seleção precisa ser explícita antes da consulta do clima.
+- **BR3 — Contrato de previsão:** a previsão do app cobre o dia atual e os quatro dias seguintes, totalizando cinco entradas diárias.
+- **BR4 — Unidade padrão:** a aplicação inicia em Celsius e usa Fahrenheit apenas após interação do usuário.
+- **BR5 — Conversão de unidade:** a alternância entre Celsius e Fahrenheit deve ocorrer na camada de apresentação e não exigir nova requisição à API.
+- **BR6 — Tratamento de campos ausentes:** quando a API não retornar um campo esperado, a UI deve mostrar um valor neutro e legível, sem quebrar layout ou lógica de renderização.
+- **BR7 — Estado inicial:** sem busca ativa e sem cidade selecionada, a interface deve permanecer em estado vazio, sem exibir dados de outra localidade.
+
 ## User Stories
 
 - **US1 — Usuário casual:** Como usuário casual, quero consultar o clima da minha cidade para planejar meu dia sem precisar navegar em vários menus.
@@ -58,15 +68,52 @@ A aplicação deve funcionar sem autenticação, sem chave de API do cliente e c
 - Dada uma cidade selecionada, quando a informação for exibida na interface, então o nome da cidade deve ser apresentado com o contexto regional adequado, especialmente quando houver homônimos.
 - Dado que a cidade escolhida seja um caso ambíguo, quando o usuário confirmar a seleção, então a aplicação deve manter esse contexto explícito na interface até a próxima busca.
 
+## API Contract
+
+### Geocoding
+- O sistema deve consumir a API de geocoding com consulta por nome.
+- O retorno esperado inclui, no mínimo: nome da cidade, país, região/estado, latitude e longitude.
+- Caso o retorno venha vazio, a UI deve exibir estado vazio sem mostrar dados anteriores.
+
+### Forecast atual
+- O sistema deve consumir os dados do clima atual usando as coordenadas da cidade selecionada.
+- Os campos esperados incluem, no mínimo: temperatura atual, sensação térmica, condição climática, umidade, velocidade do vento e precipitação.
+
+### Forecast diário
+- O sistema deve consumir a previsão diária usando as coordenadas da cidade selecionada.
+- A previsão deve conter, no mínimo, cinco entradas de dados: dia atual + quatro dias seguintes.
+- Cada entrada deve incluir data, código/condição, temperatura mínima, temperatura máxima, precipitação e vento.
+
+### Erros da API
+- Quando a API retornar erro 4xx ou 5xx, a interface deve mostrar estado de erro com ação de retry.
+- Quando a resposta vier incompleta, os campos ausentes devem ser exibidos como valores neutros e não devem quebrar a renderização.
+
+## Rastreabilidade
+
+| User Story | Requisito | Critério de aceite |
+| --- | --- | --- |
+| US1 | RF1, RF4, RF7 | AC1, AC2, AC5 |
+| US2 | RF1, RF2, RF3, RF5 | AC1, AC3, AC6 |
+| US3 | RF2, RF3, RF5, RF8 | AC1, AC3, AC6 |
+| US4 | RF1, RF7, RF8, NFR2 | AC1, AC5, NFR2 |
+| US5 | RF7, NFR4 | AC5 | 
+| US6 | RF6 | AC4 |
+
 ## Non-Functional Requirements
 
-- **NFR1 — Performance:** a interface deve responder rapidamente às ações do usuário, com carregamento percebido como imediato e sem congelamento visual durante buscas ou conversões.
+- **NFR1 — Performance:** a interface deve responder em até 2 segundos em rede 4G estável para ações de busca e renderização inicial, e a conversão de temperatura deve ocorrer sem nova chamada à API.
 - **NFR2 — Responsividade:** a aplicação deve ser mobile-first e funcionar corretamente em pequenas telas, além de manter usabilidade em desktop.
 - **NFR3 — Acessibilidade:** o produto deve oferecer navegação por teclado, labels semânticos, foco visível, contraste legível e estrutura semântica adequada para leitores de tela.
 - **NFR4 — Resiliência:** em caso de falha de rede, retorno inválido da API ou indisponibilidade do serviço, a aplicação deve preservar a experiência do usuário e apresentar mensagens compreensíveis.
 - **NFR5 — Segurança operacional:** a aplicação não deve exigir chave de API do cliente nem expor segredos de infraestrutura em front-end.
 - **NFR6 — Manutenibilidade:** regras de conversão de temperatura e renderização devem ser centralizadas em funções puras e testáveis, reduzindo duplicidade e erros.
 - **NFR7 — Qualidade:** a aplicação deve ser validada por testes unitários para regras de apresentação e conversão, e por testes end-to-end para os fluxos principais de busca e erro.
+
+## Prioridade do MVP
+
+- **P0 — Essencial:** busca, seleção de cidade, clima atual, previsão de 5 dias, alternância de unidade, carregamento/erro/vazio.
+- **P1 — Importante:** contexto regional detalhado para cidades homônimas, melhoria de apresentação visual e proteção de estados de UI.
+- **P2 — Futuro:** geolocalização automática, internacionalização e persistência local.
 
 ## Edge Cases
 
@@ -112,4 +159,8 @@ A aplicação deve funcionar sem autenticação, sem chave de API do cliente e c
 
 ## Open Questions
 
-- Nenhuma questão bloqueante permanece após as decisões do discovery; as exigências principais do MVP foram fechadas e podem ser convertidas em especificação detalhada.
+- Qual ordem de apresentação dos resultados de busca deve ter prioridade quando houver mais de uma cidade com mesmo nome?
+- A busca deve ser disparada somente após envio explícito do usuário ou também com debounce durante a digitação?
+- A aplicação deve manter cidade e unidade selecionadas no estado visual durante navegação local, mesmo sem persistência entre sessões?
+
+> As questões acima são não bloqueantes para o MVP, mas precisam de decisão de UX antes da implementação final para evitar variações de comportamento entre design e desenvolvimento.
