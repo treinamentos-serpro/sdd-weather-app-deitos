@@ -1,10 +1,10 @@
 import type {
   ForecastDay,
-  OpenMeteoForecastResponse,
+  Location,
   OpenMeteoDailyForecastPayload,
+  OpenMeteoForecastResponse,
   WeatherData,
 } from '../types/weather';
-import type { Location } from '../types/weather';
 import {
   createHttpError,
   createInvalidJsonError,

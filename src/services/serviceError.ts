@@ -29,5 +29,8 @@ export function createInvalidPayloadError(message: string): WeatherServiceExcept
 }
 
 export function createNetworkError(): WeatherServiceException {
-  return new WeatherServiceException('network', 'Não foi possível conectar ao serviço meteorológico.');
+  return new WeatherServiceException(
+    'network',
+    'Não foi possível conectar ao serviço meteorológico.',
+  );
 }

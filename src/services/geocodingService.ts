@@ -1,4 +1,8 @@
-import type { Location, OpenMeteoGeocodingResponse, OpenMeteoGeocodingResult } from '../types/weather';
+import type {
+  Location,
+  OpenMeteoGeocodingResponse,
+  OpenMeteoGeocodingResult,
+} from '../types/weather';
 import {
   createHttpError,
   createInvalidJsonError,
