@@ -11,9 +11,14 @@ export default function DailyForecast({ days, unit }: DailyForecastProps) {
 
   return (
     <section aria-labelledby="daily-forecast-title" className="space-y-4">
-      <h2 className="text-base font-semibold text-white" id="daily-forecast-title">
-        Próximos 5 dias
-      </h2>
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-base font-semibold text-white" id="daily-forecast-title">
+          Próximos 5 dias
+        </h2>
+        <span className="text-xs font-medium uppercase tracking-wide text-white/45">
+          Visão diária
+        </span>
+      </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {forecastDays.map((day) => (
           <ForecastDay day={day} key={day.date} unit={unit} />

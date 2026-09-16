@@ -37,6 +37,7 @@ Responsabilidades:
 | Vite 8 | Desenvolvimento e build | Configurado no projeto, com build estático adequado ao deploy. |
 | Tailwind CSS 3 | Estilo responsivo | Segue o tema dark glassmorphism existente e reduz CSS específico. |
 | Open-Meteo | Geocoding e previsão | Pública, sem API key, conforme NFR5. |
+| lucide-react | Iconografia funcional | Ícones consistentes, acessíveis e adequados para ações, métricas e contexto meteorológico sem SVG manual. |
 | Vitest + Testing Library | Testes unitários e de componentes | Ambiente `jsdom` e setup já configurados. |
 | Playwright | Fluxos E2E desktop e mobile | Projetos Chromium e iPhone 13 já definidos. |
 | Biome | Lint e formatação | Comandos do repositório aplicam qualidade a `src` e `tests`. |
@@ -46,6 +47,7 @@ Responsabilidades:
 ```text
 src/
   components/
+    icons.ts                  # mapeamento semântico entre contexto climático/métrica e ícones lucide
     SearchForm.tsx            # entrada, validação e submissão
     LocationResults.tsx       # resultados selecionáveis com contexto regional
     CurrentWeather.tsx        # métricas atuais
@@ -72,7 +74,7 @@ tests/
   e2e/                        # jornadas com respostas HTTP interceptadas
 ```
 
-Cada componente terá um único arquivo e exportação padrão. Serviços não renderizam nem alteram estado React; utilitários não executam I/O.
+Cada componente React terá um único arquivo e exportação padrão. Serviços não renderizam nem alteram estado React; utilitários e mapas de ícones não executam I/O.
 
 ## 4. Data Model
 
@@ -116,9 +118,20 @@ interface WeatherData {
 
 type SearchStatus = 'idle' | 'searchingLocations' | 'selectingLocation' |
   'loadingForecast' | 'success' | 'empty' | 'error';
+
+type WeatherVisualTone = 'clear' | 'cloudy' | 'rain' | 'storm' | 'fog' | 'snow' | 'wind' | 'neutral';
+
+interface WeatherVisualDescriptor {
+  label: string;
+  altText: string;
+  icon: string;
+  tone: WeatherVisualTone;
+}
 ```
 
 `Location.id`, quando disponível, é a chave estável da lista. O contexto exibido deriva de `admin1` e `country`, omitindo apenas partes indisponíveis sem ocultar o nome principal da cidade (RF8).
+
+`WeatherVisualDescriptor` estende o mapeamento WMO existente para separar significado, acessibilidade e apresentação. O campo `icon` referencia uma chave semântica de `components/icons.ts`; componentes recebem descrição e tom visual, mas não decidem qual ícone representa cada condição.
 
 ## 5. Data Flow
 
@@ -190,12 +203,53 @@ O retry repete a última operação falha: geocoding com o termo submetido ou fo
 ## 9. UI and Accessibility Decisions
 
 - Aplicar layout mobile-first em Tailwind, com fundo `night-900`, superfícies glass (`bg-white/5`, `backdrop-blur-md`, bordas sutis) e contraste de texto claro.
+- Modernizar a apresentação com uma linguagem atmosférica suave: fundo em camadas discretas inspirado em céu noturno, superfícies translúcidas menos densas, bordas de baixa opacidade, sombras difusas e gradações contextuais por condição climática sem comprometer contraste.
+- Criar uma hierarquia mais sofisticada: cabeçalho compacto, busca como ação primária, cartão de clima atual como destaque editorial-operacional e previsão em cartões de leitura rápida. Em mobile, priorizar temperatura, condição e ação de busca antes de métricas secundárias.
+- Substituir rótulos isolados de condição por pares ícone + texto. O ícone comunica varredura visual; o texto permanece como fonte semântica para acessibilidade e precisão.
+- Usar iconografia funcional com `lucide-react`: `Search`, `MapPin`, `Navigation`, `Thermometer`, `Droplets`, `Wind`, `CloudRain`, `Sun`, `Cloud`, `CloudFog`, `CloudSnow`, `CloudLightning`, `RefreshCcw`, `AlertCircle`, `LoaderCircle` e `Gauge` quando aplicável.
+- Definir tamanhos estáveis de ícones: 20-24px para controles e métricas, 32-40px para condição atual, 24-28px para previsão diária. Ícones decorativos devem ter `aria-hidden="true"`; ícones que representam condição usam texto adjacente ou `aria-label` via rótulo existente.
+- Aplicar microinterações suaves e contidas: entrada dos painéis com opacidade/translação curta, transição de unidade sem deslocamento de layout, feedback hover/focus perceptível e spinner discreto em loading. Respeitar `prefers-reduced-motion` removendo translação e rotação contínua.
+- Evoluir a paleta sem cair em tema monocromático: manter base escura, acrescentar acentos de ciano para vento/chuva, âmbar para sol/temperatura e verde-água para estados neutros. Erros usam vermelho suave com alto contraste, sem depender só de cor.
 - Usar `main`, `header`, `form`, `section`, `article`, listas e botões reais. Resultados de localização são botões navegáveis por Tab, Enter e Espaço.
 - O input tem `label` visível ou acessível, `aria-describedby` para validação e submit por Enter. O alternador de unidade é um grupo rotulado de botões com estado atual em `aria-pressed`.
 - A área de feedback de status usará `role="status"` e `aria-live="polite"` para carregamento e progresso, enquanto mensagens críticas usarão `role="alert"` e `aria-live="assertive"` sem conflito de anúncios.
 - Controles de escolha devem expor estado ativo/selecionado por meio de `aria-pressed`, `aria-current` ou equivalente, com destaque visual consistente para cada opção selecionada.
 - Exibir previsão em `grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5`, com cinco cartões de tamanho estável e foco visível.
 - Formatar datas por `Intl.DateTimeFormat('pt-BR', ...)`. Exibir ícone e rótulo textual da condição, sem depender apenas de cor ou símbolo.
+
+### 9.1 UX Modernization Plan
+
+Objetivo: elevar a percepção de qualidade sem reduzir a rapidez de consulta do MVP. A modernização deve atender US1, US4, RF4, RF5, RF7, RF8, NFR2 e NFR3.
+
+1. Direção visual
+   - Manter dark glassmorphism, mas reduzir aparência genérica com profundidade por camadas: background atmosférico, painel principal, cartões de métrica e estados.
+   - Usar raios de 8px ou menos nos cartões, alinhado à regra visual do projeto, com espaçamentos consistentes e leitura densa o suficiente para uso recorrente.
+   - Reservar tipografia grande apenas para temperatura atual; demais títulos ficam compactos para favorecer escaneabilidade.
+
+2. Sistema de iconografia
+   - Centralizar ícones em `components/icons.ts`, expondo mapas semânticos por condição e métrica.
+   - Condições WMO: céu limpo -> `Sun`; parcialmente nublado -> `CloudSun`; nublado -> `Cloud`; neblina -> `CloudFog`; garoa/chuva -> `CloudRain`; neve -> `CloudSnow`; tempestade -> `CloudLightning`; vento forte ou condição neutra -> `Wind`/`Cloud`.
+   - Métricas: temperatura -> `Thermometer`; sensação térmica -> `Gauge`; umidade -> `Droplets`; vento -> `Wind`; precipitação -> `CloudRain`; localidade -> `MapPin`; retry -> `RefreshCcw`; erro -> `AlertCircle`; busca -> `Search`.
+   - Evitar ícones puramente ornamentais. Todo ícone deve reforçar uma métrica, uma ação ou uma condição climática.
+
+3. Componentes prioritários
+   - `SearchForm`: botão com ícone de busca, estado loading com `LoaderCircle`, foco visível e mensagem de validação visualmente próxima ao campo.
+   - `LocationResults`: cada localidade com `MapPin`, país/região em hierarquia secundária e estado selecionado claro durante `loadingForecast`.
+   - `CurrentWeather`: cartão principal com temperatura dominante, ícone climático grande, condição textual, sensação térmica e três métricas com ícones.
+   - `ForecastDay`: cartões compactos com data, ícone da condição, máxima/mínima e indicadores de chuva/vento com alinhamento estável.
+   - `FeedbackState`: estados vazio, erro e loading com ícone próprio, tom visual distinto e ação de retry evidente.
+
+4. Suavidade e movimento
+   - Adicionar transições de 150-220ms para hover, focus, troca de unidade e entrada de resultados.
+   - Evitar animações decorativas longas; loading usa rotação somente quando `prefers-reduced-motion` permitir.
+   - Garantir que animações não alterem dimensões dos cartões nem reposicionem texto durante atualizações.
+
+5. Critérios de aceite UX
+   - Em desktop e mobile, a primeira dobra deve comunicar cidade, temperatura, condição e ação principal sem sobreposição.
+   - Toda métrica meteorológica relevante deve ter ícone contextual e rótulo textual.
+   - Estados de loading, erro, vazio e seleção devem ser distinguíveis por texto, ícone e hierarquia visual.
+   - A paleta deve preservar contraste AA para textos essenciais e foco visível em todos os controles.
+   - A troca C/F deve atualizar valores sem requisição, sem salto de layout e mantendo largura estável para temperaturas.
 
 ## 10. Testing Strategy
 
@@ -225,9 +279,10 @@ Mockar `fetch` nos testes de services/hook; não depender da Open-Meteo em teste
 3. Implementar `useWeatherSearch` com máquina de estados simples, cancelamento e retry; validar transições em teste.
 4. Construir `SearchForm` e `LocationResults`, incluindo validação, seleção explícita e acessibilidade de teclado.
 5. Construir `CurrentWeather`, `ForecastDay`, `DailyForecast` e `UnitToggle`; integrar em `App` com layout Tailwind responsivo.
-6. Adicionar feedback para todos os estados e executar testes E2E com rotas da API interceptadas.
-7. Implementar a camada de a11y específica do ajuste: live regions consistentes, estado selecionado em controles e validação de foco/teclado.
-8. Executar `pnpm lint`, `pnpm build`, `pnpm test` e `pnpm test:e2e` antes da revisão.
+6. Modernizar a camada visual: instalar `lucide-react`, criar `components/icons.ts`, aplicar iconografia contextual e refinar cartões, hierarquia, tokens de cor e microinterações.
+7. Adicionar feedback para todos os estados e executar testes E2E com rotas da API interceptadas.
+8. Implementar a camada de a11y específica do ajuste: live regions consistentes, estado selecionado em controles e validação de foco/teclado.
+9. Executar `pnpm lint`, `pnpm build`, `pnpm test` e `pnpm test:e2e` antes da revisão.
 
 ## 12. Accessibility Implementation Plan
 
@@ -264,3 +319,5 @@ O ajuste de acessibilidade incorporado à spec exige uma implementação explíc
 | Estado local em vez de store global | Escala limitada | Suficiente para uma tela e uma cidade; migrar apenas se surgirem fluxos compartilhados. |
 | Conversão local, não na API | Arredondamentos consistentes | Centralizar cálculo e arredondar apenas na exibição; atende BR5 e NFR1. |
 | Dependência de API pública | Indisponibilidade eventual | Mensagem clara, retry e testes com mocks; não há fallback de dados no MVP. |
+| Iconografia excessiva ou ambígua | Poluição visual e menor acessibilidade | Usar apenas ícones com função clara, sempre acompanhados de texto ou rótulo acessível. |
+| Modernização visual reduzindo contraste | Risco em NFR3 e leitura mobile | Validar contraste, foco e `prefers-reduced-motion`; não depender de transparência ou cor isolada. |
