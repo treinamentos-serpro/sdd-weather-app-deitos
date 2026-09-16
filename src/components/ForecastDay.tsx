@@ -22,8 +22,14 @@ export default function ForecastDay({ day, unit }: ForecastDayProps) {
         {weatherCondition.label}
       </span>
       <dl className="mt-4 space-y-2 text-sm">
-        <ForecastMetric label="Máxima" value={formatTemperature(day.maximumTemperatureCelsius, unit)} />
-        <ForecastMetric label="Mínima" value={formatTemperature(day.minimumTemperatureCelsius, unit)} />
+        <ForecastMetric
+          label="Máxima"
+          value={formatTemperature(day.maximumTemperatureCelsius, unit)}
+        />
+        <ForecastMetric
+          label="Mínima"
+          value={formatTemperature(day.minimumTemperatureCelsius, unit)}
+        />
         <ForecastMetric label="Precipitação" value={formatNumber(day.precipitationMm, ' mm')} />
         <ForecastMetric label="Vento" value={formatNumber(day.maximumWindSpeedKmh, ' km/h')} />
       </dl>

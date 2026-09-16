@@ -12,7 +12,11 @@ const options: Array<{ label: string; value: TemperatureUnit }> = [
 
 export default function UnitToggle({ unit, onChange }: UnitToggleProps) {
   return (
-    <div aria-label="Unidade de temperatura" className="inline-flex rounded-lg border border-white/10 bg-white/5 p-1" role="group">
+    <div
+      aria-label="Unidade de temperatura"
+      className="inline-flex rounded-lg border border-white/10 bg-white/5 p-1"
+      role="group"
+    >
       {options.map((option) => {
         const isSelected = option.value === unit;
 

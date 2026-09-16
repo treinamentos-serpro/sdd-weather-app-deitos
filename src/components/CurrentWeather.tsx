@@ -17,7 +17,10 @@ export default function CurrentWeather({ current, unit }: CurrentWeatherProps) {
     >
       <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-white/60" id="current-weather-title">
+          <h2
+            className="text-sm font-semibold uppercase tracking-wide text-white/60"
+            id="current-weather-title"
+          >
             Clima atual
           </h2>
           <p className="mt-3 text-6xl font-bold leading-none text-white">

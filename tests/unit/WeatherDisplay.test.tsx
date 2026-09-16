@@ -1,6 +1,6 @@
 import CurrentWeather from '../../src/components/CurrentWeather';
 import DailyForecast from '../../src/components/DailyForecast';
-import { incompleteWeatherData, completeWeatherData } from '../fixtures/weather';
+import { completeWeatherData, incompleteWeatherData } from '../fixtures/weather';
 import { renderWithUser, screen, within } from '../test-utils';
 
 describe('weather display components', () => {

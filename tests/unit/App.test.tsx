@@ -1,5 +1,5 @@
 import App from '../../src/App';
-import { useWeatherSearch, type UseWeatherSearchResult } from '../../src/hooks/useWeatherSearch';
+import { type UseWeatherSearchResult, useWeatherSearch } from '../../src/hooks/useWeatherSearch';
 import type { WeatherSearchState } from '../../src/types/weather';
 import { completeWeatherData, locationsFixture, saoPauloLocation } from '../fixtures/weather';
 import { renderWithUser, screen, within } from '../test-utils';
