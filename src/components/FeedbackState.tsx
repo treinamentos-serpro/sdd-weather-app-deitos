@@ -13,9 +13,11 @@ export default function FeedbackState({ status, error, onRetry }: FeedbackStateP
     return null;
   }
 
+  const liveRegion = status === 'error' ? 'assertive' : content.isDynamic ? 'polite' : undefined;
+
   return (
     <section
-      aria-live={content.isDynamic ? 'polite' : undefined}
+      aria-live={liveRegion}
       className="rounded-lg border border-white/10 bg-white/5 p-5 text-white shadow-glass backdrop-blur-md"
       role={status === 'error' ? 'alert' : 'status'}
     >

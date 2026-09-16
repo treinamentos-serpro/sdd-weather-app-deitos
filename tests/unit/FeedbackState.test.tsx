@@ -40,7 +40,7 @@ describe('FeedbackState', () => {
     retryButton.focus();
     await user.click(retryButton);
 
-    expect(screen.getByRole('alert')).toHaveAttribute('aria-live', 'polite');
+    expect(screen.getByRole('alert')).toHaveAttribute('aria-live', 'assertive');
     expect(screen.getByRole('alert')).toHaveTextContent(
       'Não foi possível conectar ao serviço meteorológico.',
     );

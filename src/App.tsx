@@ -12,6 +12,10 @@ export default function App() {
   const [unit, setUnit] = useState<TemperatureUnit>('celsius');
   const { state, searchLocations, selectLocation, retry } = useWeatherSearch();
   const isLoading = state.status === 'searchingLocations' || state.status === 'loadingForecast';
+  const selectedLocationId =
+    state.status === 'loadingForecast' || state.status === 'success' || state.status === 'error'
+      ? state.selectedLocation?.id ?? null
+      : null;
 
   return (
     <main className="min-h-screen bg-night-900 px-4 py-6 text-white sm:px-6 lg:px-8">
@@ -42,7 +46,11 @@ export default function App() {
         <FeedbackState error={state.error} onRetry={retry} status={state.status} />
 
         {state.status === 'selectingLocation' ? (
-          <LocationResults locations={state.locations} onSelect={selectLocation} />
+          <LocationResults
+            locations={state.locations}
+            onSelect={selectLocation}
+            selectedLocationId={selectedLocationId}
+          />
         ) : null}
 
         {state.status === 'success' ? (

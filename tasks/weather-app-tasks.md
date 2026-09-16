@@ -210,6 +210,60 @@ dependência e verificáveis isoladamente. As tarefas seguem o fluxo
   - O estado de erro exibe botão acessível que chama retry.
   - A ação de retry mantém foco e não exige recarregar a página.
 
+### T-12A — Padronizar live regions e prioridade de anúncio
+
+- **Tipo:** UI / Hardening
+- **Descrição:** Definir um padrão semântico consistente para estados de
+  carregamento, progresso e erro, evitando conflito entre `role="alert"` e
+  `aria-live` e preservando a leitura com leitores de tela.
+- **Requisitos:** NFR3, NFR4, NFR7.
+- **Dependências:** T-12.
+- **Arquivos prováveis:** `src/components/FeedbackState.tsx`.
+- **Critérios de aceite:**
+  - Mensagens de progresso e carregamento usam `role="status"` com
+    `aria-live="polite"`.
+  - Mensagens críticas de erro usam `role="alert"` com prioritização
+    assertiva e sem duplicação de anúncio.
+  - Não há cenário em que `role="alert"` seja combinado com `aria-live` em
+    modo discordante.
+  - O comportamento é consistente para busca, erro e retry em todas as telas.
+
+### T-12B — Expor estado ativo/selecionado em controles de escolha
+
+- **Tipo:** UI / Hardening
+- **Descrição:** Garantir que os controles de escolha — localidade e unidade —
+  exponham seu estado atual de forma semântica e visível para teclado e leitor
+  de tela.
+- **Requisitos:** NFR3, NFR7.
+- **Dependências:** T-11, T-14.
+- **Arquivos prováveis:** `src/components/LocationResults.tsx`,
+  `src/components/UnitToggle.tsx`.
+- **Critérios de aceite:**
+  - A opção ativa de cidade e a unidade selecionada são identificadas por
+    atributos semânticos de estado (`aria-pressed`, `aria-current` ou
+    equivalente).
+  - O destaque visual e o anúncio semântico representam o mesmo estado.
+  - Usuários de teclado têm indicação clara de qual item está selecionado.
+  - A navegação continua funcional sem depender apenas da cor ou do símbolo.
+
+### T-12C — Validar acessibilidade de teclado e regressão de anúncios
+
+- **Tipo:** Test / Hardening
+- **Descrição:** Cobrir o fluxo de busca, seleção e erro com testes de
+  comportamentos acessíveis e navegação por teclado.
+- **Requisitos:** AC1, AC5, AC6, NFR3, NFR7.
+- **Dependências:** T-12A, T-12B, T-16.
+- **Arquivos prováveis:** `tests/unit/FeedbackState.test.tsx`,
+  `tests/unit/LocationResults.test.tsx`, `tests/unit/UnitToggle.test.tsx`,
+  `tests/e2e/weather-app.spec.ts`.
+- **Critérios de aceite:**
+  - Os testes validam que a navegação por teclado funciona em busca,
+    seleção de localidade e troca de unidade.
+  - Há cenário específico para mensagem de erro anunciada como alerta
+    crítico sem conflito de live region.
+  - Há cenário para o item selecionado ser exposto por semântica acessível.
+  - A regressão de a11y é detectada em testes automatizados antes do merge.
+
 ## Entrega 5 — Clima, previsão e unidade
 
 ### T-13 — Construir apresentação do clima atual e da previsão diária
@@ -345,8 +399,9 @@ T-01 -> T-02 -> T-03 -> T-04
 T-01 -> T-05 -> T-06 -> T-07
 T-05 + T-06 -> T-08 -> T-09
 T-08 -> T-10 + T-11 + T-12
+T-12 -> T-12A + T-12B + T-12C
 T-02 + T-06 -> T-13 -> T-14
-T-10 + T-11 + T-12 + T-13 + T-14 -> T-15 -> T-16
+T-10 + T-11 + T-12 + T-12A + T-12B + T-12C + T-13 + T-14 -> T-15 -> T-16
 T-15 -> T-17
 T-04 + T-07 + T-09 + T-16 + T-17 -> T-18 -> T-19
 ```
