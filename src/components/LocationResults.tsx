@@ -29,7 +29,11 @@ export default function LocationResults({
             <li key={location.id}>
               <button
                 aria-pressed={isSelected}
-                className="w-full rounded-lg border border-white/10 bg-white/5 p-4 text-left text-white backdrop-blur-md transition hover:border-accent-400/70 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:ring-offset-2 focus:ring-offset-night-900"
+className={
+  isSelected
+    ? 'w-full rounded-lg border border-accent-400 bg-accent-500/20 p-4 text-left text-white backdrop-blur-md transition focus:outline-none focus:ring-2 focus:ring-accent-400 focus:ring-offset-2 focus:ring-offset-night-900'
+    : 'w-full rounded-lg border border-white/10 bg-white/5 p-4 text-left text-white backdrop-blur-md transition hover:border-accent-400/70 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:ring-offset-2 focus:ring-offset-night-900'
+}
                 onClick={() => void onSelect(location)}
                 type="button"
               >
